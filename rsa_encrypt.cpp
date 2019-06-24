@@ -156,19 +156,33 @@ int main()
 
   encrypted_text enc_text;
   decrypted_text dec_text;
+  char input[50];
 
-  char input[] = "eduardo caraio";
+  cout << "Informe uma mensagem: ";
+  cin.get(input, 50);
 
   encrypt(input, &enc_text, 3, 11, 7);
 
-  for(int i = 0; i < enc_text.size; i++)
-    cout << " " << enc_text.text[i] << " ";
+  cout << "Mensagem criptografada ---------------------" << endl << endl;
+  for(int i = 0; i < enc_text.size; i++){
 
-  cout << endl;
+    if(enc_text.text[i] < 10 && enc_text.text[i] >= 0){
+      cout << "  0" << enc_text.text[i] << "  ";
+    }else if(enc_text.text[i] < 0){
+      cout << " " << enc_text.text[i] << "  ";
+    }else{
+      cout << "  " << enc_text.text[i] << "  ";
+    }
+
+    if((i+1)%10 == 0)
+      cout << endl;
+
+  }
+  cout << endl << endl;
 
   decrypt(&enc_text, &dec_text, 3, 11, 7);
 
-  cout << dec_text.text << endl;
+  cout << "Mensagem descriptografada: " << dec_text.text << endl;
 
   return 0;
 
