@@ -1,5 +1,16 @@
 #include <iostream>
 #include <math.h>
+#include <cstring>
+
+struct encrypted_text{
+  int* text;
+  int size;
+};
+
+struct decrypted_text{
+  char* text;
+  int size;
+};
 
 using namespace std;
 
@@ -26,15 +37,14 @@ int is_prime_number(int n)
 
 }
 
-//Encontre e, tal que d × e = 1 mod z
 int find_e(int d, int z)
 {
 
   int e = 0;
-  while(!(d * e == 1 % z) && e <= 20)
+  while(!((d * e)%z == 1) && e <= 20)
     e++;
 
-  if(e <= 20)
+  if(e >= 20)
     e = 0;
 
   return e;
@@ -56,12 +66,13 @@ int is_prime_each_other(int d, int z)
 //o ideal é separar a informacoes em 4bits, pq esse é o limite la q o professor disse q vai tirar D quem nao fizer
 //operar os bits de forma a criptografar cada 4 bits
 
-void encrypt(char *input, int p, int q, int d)
+void encrypt(char *input, encrypted_text *output, int p, int q, int d)
 {
 
-  int size = sizeof(input);
-  int i, j, n, z, e;
-  unsigned int c;
+  int size = strlen(input);
+  int i, j, n, z, e, c;
+
+  output->text = (int*) malloc((2 * size) * sizeof(int));
 
   if(!is_prime_number(p) || !is_prime_number(q)){
     cout << "P ou Q não é primo!" << endl;
@@ -78,30 +89,87 @@ void encrypt(char *input, int p, int q, int d)
   n = p * q;
   e = find_e(d, z);
 
+  if(e == 0){
+    cout << "E não encontrado" << endl;
+    return;
+  }
+
+  j = 0;
   for(i = 0; i < size; i++){
 
-      c = 0x00;
+      c = 0;
       c = input[i] & 0xF;
-      c = fmod(pow(c, e), n);
-      input[i] = input[i] | c;
+      output->text[j] = fmod(pow(c, e), n);
+      j++;
 
-      c = 0x00;
-      c = input[i] & 0xF0;
-      c = c >> 4;
-      c = fmod(pow(c, e), n);
-      input[i] = input[i] | (c << 4);
+      c = input[i] >> 4;
+      output->text[j] = fmod(pow(c, e), n);
+      j++;
 
   }
+
+  output->size = j;
+
+}
+
+void decrypt(encrypted_text *input, decrypted_text *output, int p, int q, int d)
+{
+
+  int i, j, n, z;
+  char c;
+
+  output->size = input->size/2;
+  output->text = (char*) malloc((output->size + 1) * sizeof(char));
+
+  if(!is_prime_number(p) || !is_prime_number(q)){
+    cout << "P ou Q não é primo!" << endl;
+    return;
+  }
+
+  z = (p - 1) * (q - 1);
+
+  if(is_prime_each_other(d, z)){
+    cout << "Não é primo entre si!" << endl;
+    return;
+  }
+
+  n = p * q;
+
+  j = 0;
+  for(i = 0; i < output->size; i++){
+
+      c = 0x00;
+      c = ( (int) fmod(pow(input->text[j], d), n)) | 0x00;
+      j++;
+
+      output->text[i] = c | ( ((int) fmod(pow(input->text[j], d), n)) << 4);
+      j++;
+
+  }
+
+  output->text[output->size] = 0;
 
 }
 
 int main()
 {
 
-  char c[] = "eduar";
+  encrypted_text enc_text;
+  decrypted_text dec_text;
 
-  encrypt(c, 3, 11, 7);
-  cout << "Teste: " << c << endl;
+  char input[] = "eduardo caraio";
+
+  encrypt(input, &enc_text, 3, 11, 7);
+
+  for(int i = 0; i < enc_text.size; i++)
+    cout << " " << enc_text.text[i] << " ";
+
+  cout << endl;
+
+  decrypt(&enc_text, &dec_text, 3, 11, 7);
+
+  cout << dec_text.text << endl;
 
   return 0;
+
 }
