@@ -63,9 +63,6 @@ int is_prime_each_other(int d, int z)
 
 }
 
-//o ideal é separar a informacoes em 4bits, pq esse é o limite la q o professor disse q vai tirar D quem nao fizer
-//operar os bits de forma a criptografar cada 4 bits
-
 void encrypt(char *input, encrypted_text *output, int p, int q, int d)
 {
 
